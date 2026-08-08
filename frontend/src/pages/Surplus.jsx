@@ -30,10 +30,10 @@ export default function Surplus() {
 
   async function handleClaim(id) {
     try {
-      await claimSurplus(id, {});
-      flash('Food claimed successfully! 🎉');
+      const res = await claimSurplus(id, {});
+      flash(res?.message || 'Food claim request submitted! Pending admin approval. ⏳');
       load();
-    } catch { flash('Could not claim — may already be taken.', false); }
+    } catch (err) { flash(err.response?.data?.error || 'Could not claim — may already be taken or pending.', false); }
   }
 
   const available = items.filter(i => i.is_available);

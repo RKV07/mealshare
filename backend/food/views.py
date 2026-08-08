@@ -126,16 +126,28 @@ def claim_surplus(request, surplus_id):
         return Response({'error': 'Already claimed'}, status=400)
 
     student = getattr(request.user, 'student_profile', None)
+    if not student and request.user.is_authenticated:
+        name = request.user.get_full_name() or request.user.username or 'Admin'
+        student, _ = Student.objects.get_or_create(
+            user=request.user,
+            defaults={
+                'name': name,
+                'room_no': 'Admin' if (request.user.is_staff or request.user.is_superuser) else 'N/A',
+                'dietary_pref': ''
+            }
+        )
     claim = FoodClaim.objects.create(
         surplus=surplus,
         student=student,
         claim_type='Student',
         quantity_kg=surplus.quantity_kg,
-        status='Approved'
+        status='Pending'
     )
-    surplus.is_available = False
-    surplus.save()
-    return Response({'message': 'Food claimed!', 'claim_id': claim.id})
+    return Response({
+        'message': 'Food claim request submitted! Pending admin approval.',
+        'claim_id': claim.id,
+        'status': 'Pending'
+    }, status=201)
 
 
 @api_view(['GET'])
@@ -192,6 +204,16 @@ def waste_report(request):
 @permission_classes([IsAuthenticated])
 def meal_bookings(request):
     student = getattr(request.user, 'student_profile', None)
+    if not student and request.user.is_authenticated:
+        name = request.user.get_full_name() or request.user.username or 'Admin'
+        student, _ = Student.objects.get_or_create(
+            user=request.user,
+            defaults={
+                'name': name,
+                'room_no': 'Admin' if (request.user.is_staff or request.user.is_superuser) else 'N/A',
+                'dietary_pref': ''
+            }
+        )
     if request.method == 'GET':
         if not student:
             return Response([])
@@ -199,7 +221,7 @@ def meal_bookings(request):
         return Response(MealBookingSerializer(bookings, many=True).data)
 
     if not student:
-        return Response({'error': 'Only students can self-book meals.'}, status=400)
+        return Response({'error': 'Could not identify student profile for booking.'}, status=400)
 
     s = MealBookingSerializer(data=request.data)
     if s.is_valid():
@@ -394,7 +416,7 @@ def ngo_claims(request):
 
     if request.method == 'GET':
         if request.user.is_staff or request.user.is_superuser:
-            claims = FoodClaim.objects.filter(claim_type='NGO').order_by('-claimed_at')
+            claims = FoodClaim.objects.all().order_by('-claimed_at')
         elif ngo_profile:
             claims = FoodClaim.objects.filter(ngo=ngo_profile, claim_type='NGO').order_by('-claimed_at')
         else:

@@ -31,13 +31,13 @@ urlpatterns = [
     path('predict/',            views.predict_tomorrow),
     path('waste-report/',       views.waste_report),
 
-    # Bookings
+    # Bookings — static paths MUST come before dynamic <int:booking_id> paths
     path('bookings/',                           views.meal_bookings),
     path('bookings/all/',                       views.all_bookings),
     path('bookings/count/',                     views.booking_count_today),
     path('bookings/register/',                  views.admin_register_booking),
-    path('bookings/<int:booking_id>/',          views.cancel_booking),
     path('bookings/<int:booking_id>/attend/',   views.mark_attendance),
+    path('bookings/<int:booking_id>/',          views.cancel_booking),
 
     # Ingredients
     path('ingredients/',                views.ingredients),

@@ -40,9 +40,9 @@ export const getWasteReport   = ()          => client.get('/waste-report/').then
 
 // NGO Management & Claims
 export const getNGOContacts   = ()          => client.get('/ngo/').then(r => r.data);
-export const addNGOContact    = (data)      => client.post('/ngo/', data);
-export const updateNGOContact = (id, data)  => client.put(`/ngo/${id}/`, data);
-export const deleteNGOContact = (id)        => client.delete(`/ngo/${id}/`);
+export const addNGOContact    = (data)      => client.post('/ngo/', data).then(r => r.data);
+export const updateNGOContact = (id, data)  => client.put(`/ngo/${id}/`, data).then(r => r.data);
+export const deleteNGOContact = (id)        => client.delete(`/ngo/${id}/`).then(r => r.data);
 export const getNGOClaims     = ()          => client.get('/ngo/claims/').then(r => r.data);
 export const submitNGOClaim   = (data)      => client.post('/ngo/claims/', data).then(r => r.data);
 export const approveNGOClaim  = (id)        => client.post(`/ngo/claims/${id}/approve/`).then(r => r.data);

@@ -16,8 +16,11 @@ export default function Students() {
 
   async function load() {
     setLoading(true);
-    try { const r = await getStudents(); setStudents(r.data); }
-    finally { setLoading(false); }
+    try {
+      const r = await getStudents();
+      const list = Array.isArray(r) ? r : (r?.data || []);
+      setStudents(list);
+    } finally { setLoading(false); }
   }
 
   useEffect(()=>{ load(); },[]);

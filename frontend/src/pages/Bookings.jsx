@@ -69,6 +69,7 @@ export default function Bookings() {
     } catch (err) {
       const data = err.response?.data;
       const msg = data?.non_field_errors?.[0]
+        || data?.error
         || data?.detail
         || (typeof data === 'string' ? data : null)
         || "Booking failed. Please try again.";

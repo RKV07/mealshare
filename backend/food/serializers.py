@@ -90,9 +90,24 @@ class LoginSerializer(serializers.Serializer):
 
 class MealLogSerializer(serializers.ModelSerializer):
     surplus_kg = serializers.ReadOnlyField()
+
     class Meta:
         model = MealLog
         fields = '__all__'
+
+    def validate(self, attrs):
+        prepared = attrs.get('prepared_kg')
+        consumed = attrs.get('consumed_kg')
+        # On partial updates (PUT with only one field), fall back to instance values
+        if prepared is None and self.instance:
+            prepared = self.instance.prepared_kg
+        if consumed is None and self.instance:
+            consumed = self.instance.consumed_kg
+        if prepared is not None and consumed is not None and consumed > prepared:
+            raise serializers.ValidationError(
+                {'consumed_kg': 'Consumed quantity cannot exceed prepared quantity.'}
+            )
+        return attrs
 
 class FoodClaimSerializer(serializers.ModelSerializer):
     student_name = serializers.CharField(source='student.name', read_only=True)

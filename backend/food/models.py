@@ -28,6 +28,15 @@ class MealLog(models.Model):
     def surplus_kg(self):
         return round(self.prepared_kg - self.consumed_kg, 2)
 
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.consumed_kg is not None and self.prepared_kg is not None and self.consumed_kg > self.prepared_kg:
+            raise ValidationError({'consumed_kg': 'Consumed quantity cannot exceed prepared quantity.'})
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f'{self.date} - {self.meal_type}: {self.meal_name}'
 

@@ -11,8 +11,12 @@ export default function Reports() {
   const [loading, setLoading] = useState(true);
 
   useEffect(()=>{
-    Promise.all([getWasteReport(), getMealLogs().then(r=>r.data)])
-      .then(([w,m])=>{ setWaste(w); setMeals(m); })
+    Promise.all([getWasteReport(), getMealLogs()])
+      .then(([w,m])=>{
+        setWaste(w);
+        const list = Array.isArray(m) ? m : (m?.data || []);
+        setMeals(list);
+      })
       .finally(()=>setLoading(false));
   },[]);
 

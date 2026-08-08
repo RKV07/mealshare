@@ -50,6 +50,11 @@ export default function Dashboard() {
 
   async function handleSubmit(e) {
     e.preventDefault(); setBusy(true);
+    if (parseFloat(form.consumed_kg) > parseFloat(form.prepared_kg)) {
+      flash('Consumed quantity cannot exceed prepared quantity.', false);
+      setBusy(false);
+      return;
+    }
     try {
       await createMealLog(form);
       const diff = Number(form.prepared_kg) - Number(form.consumed_kg);
@@ -57,15 +62,15 @@ export default function Dashboard() {
       setForm({ meal_name: '', meal_type: 'Lunch', prepared_kg: '', consumed_kg: '' });
       load();
     } catch (err) {
-      flash(err.response?.data?.error || 'Failed to log meal.', false);
+      flash(err.response?.data?.consumed_kg?.[0] || err.response?.data?.error || 'Failed to log meal.', false);
     } finally { setBusy(false); }
   }
 
   async function handleClaim(item) {
     try {
-      await claimSurplus(item.id, {});
-      flash('Food claimed! 🎉'); load();
-    } catch { flash('Could not claim — already taken.', false); }
+      const res = await claimSurplus(item.id, {});
+      flash(res?.message || 'Claim request submitted! Pending admin approval. ⏳'); load();
+    } catch (err) { flash(err.response?.data?.error || 'Could not submit claim.', false); }
   }
 
   const chartData = useMemo(() => {

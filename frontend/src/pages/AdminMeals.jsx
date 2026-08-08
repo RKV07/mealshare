@@ -22,7 +22,8 @@ export default function AdminMeals() {
     setLoading(true);
     try {
       const res = await getMealLogs();
-      setMeals(res.data);
+      const list = Array.isArray(res) ? res : (res?.data || []);
+      setMeals(list);
     } catch {
       flash('Failed to load meal logs.', false);
     } finally {
@@ -34,6 +35,10 @@ export default function AdminMeals() {
 
   async function handleAdd(e) {
     e.preventDefault();
+    if (parseFloat(form.consumed_kg) > parseFloat(form.prepared_kg)) {
+      flash('Consumed quantity cannot exceed prepared quantity.', false);
+      return;
+    }
     try {
       await createMealLog(form);
       flash('Meal logged & surplus auto-posted!');
@@ -57,6 +62,10 @@ export default function AdminMeals() {
   async function handleUpdate(e) {
     e.preventDefault();
     if (!editMeal) return;
+    if (parseFloat(editForm.consumed_kg) > parseFloat(editForm.prepared_kg)) {
+      flash('Consumed quantity cannot exceed prepared quantity.', false);
+      return;
+    }
     try {
       await updateMealLog(editMeal.id, editForm);
       flash('Meal log updated!');

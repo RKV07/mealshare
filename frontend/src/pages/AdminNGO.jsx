@@ -115,7 +115,7 @@ export default function AdminNGO() {
       {/* Tabs */}
       <div className="flex gap-2 bg-gray-100 dark:bg-gray-800/60 rounded-xl p-1 w-fit border border-gray-200 dark:border-gray-700">
         <button onClick={() => setTab('claims')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${tab === 'claims' ? 'bg-white dark:bg-gray-900 text-blue-600 shadow-sm' : 'text-gray-500'}`}>
-          NGO Claims {pendingClaims.length > 0 && <span className="ml-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{pendingClaims.length} pending</span>}
+          Surplus Claims (Student & NGO) {pendingClaims.length > 0 && <span className="ml-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{pendingClaims.length} pending</span>}
         </button>
         <button onClick={() => setTab('contacts')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${tab === 'contacts' ? 'bg-white dark:bg-gray-900 text-blue-600 shadow-sm' : 'text-gray-500'}`}>
           Partner Contacts ({ngos.length})
@@ -125,32 +125,37 @@ export default function AdminNGO() {
       {tab === 'claims' && (
         <div className="space-y-4">
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30 rounded-xl p-4 text-xs text-blue-700 dark:text-blue-300">
-            🤝 Approved NGO claims directly deduct leftover surplus from the board and mark food as successfully donated.
+            🤝 Approved surplus claims deduct leftover food from the board and mark food as successfully redistributed or donated.
           </div>
 
           {loading ? (
             <div className="text-center py-12 text-gray-400 text-sm animate-pulse">Loading claims…</div>
           ) : claims.length === 0 ? (
-            <div className="text-center py-12 text-gray-400 text-sm">No NGO claims recorded yet.</div>
+            <div className="text-center py-12 text-gray-400 text-sm">No food claims recorded yet.</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {claims.map(c => (
                 <div key={c.id} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 space-y-3 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        c.status === 'Approved' ? 'bg-green-100 text-green-700 dark:bg-green-900/40' :
-                        c.status === 'Pending' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40' :
-                        'bg-red-100 text-red-700 dark:bg-red-900/40'
-                      }`}>
-                        {c.status}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          c.status === 'Approved' ? 'bg-green-100 text-green-700 dark:bg-green-900/40' :
+                          c.status === 'Pending' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40' :
+                          'bg-red-100 text-red-700 dark:bg-red-900/40'
+                        }`}>
+                          {c.status}
+                        </span>
+                        <span className="text-[10px] font-semibold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">
+                          {c.claim_type || (c.ngo_name ? 'NGO' : 'Student')}
+                        </span>
+                      </div>
                       <span className="text-[10px] text-gray-400 flex items-center gap-1">
                         <Clock size={11}/> {new Date(c.claimed_at).toLocaleDateString('en-IN')}
                       </span>
                     </div>
 
-                    <h4 className="font-bold text-sm text-gray-900 dark:text-white">{c.ngo_name || 'NGO Partner'}</h4>
+                    <h4 className="font-bold text-sm text-gray-900 dark:text-white">{c.ngo_name || c.student_name || 'Claimant'}</h4>
                     <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-0.5">{c.quantity_kg} kg Requested</p>
                     <p className="text-xs text-gray-400 mt-1">{c.surplus_description || 'Surplus Item'}</p>
                     {c.notes && <p className="text-[11px] text-gray-500 italic mt-1 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">"{c.notes}"</p>}
